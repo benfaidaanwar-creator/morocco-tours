@@ -5,8 +5,7 @@
     "node": "20.x"
   },
   "workspaces": [
-    "apps/web",
-    "apps/mobile"
+    "apps/web"
   ],
   "scripts": {
     "build": "npm run build --workspace=web",
