@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd apps/web && npm install --legacy-peer-deps --include=dev",
-  "buildCommand": "cd apps/web && npm run build"
+  "installCommand": "if [ -d apps/web ]; then cd apps/web; fi; npm install --legacy-peer-deps --include=dev",
+  "buildCommand": "if [ -d apps/web ]; then cd apps/web; fi; npm run build"
 }
