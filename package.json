@@ -4,11 +4,9 @@
   "engines": {
     "node": "20.x"
   },
-  "workspaces": [
-    "apps/web"
-  ],
   "scripts": {
-    "build": "npm run build --workspace=web",
-    "dev:web": "npm run dev --workspace=web"
+    "prebuild": "npm --prefix apps/web install --legacy-peer-deps",
+    "build": "npm --prefix apps/web run build",
+    "dev:web": "npm --prefix apps/web run dev"
   }
 }
