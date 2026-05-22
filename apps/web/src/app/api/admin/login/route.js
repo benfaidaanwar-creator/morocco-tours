@@ -1,5 +1,21 @@
 import { getSupabaseAdmin, throwIfSupabaseError } from "@/app/api/utils/supabase";
-import argon2 from "argon2";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+
+const hashPassword = (password) => {
+  const salt = randomBytes(16).toString("hex");
+  const hash = scryptSync(password, salt, 64).toString("hex");
+  return `scrypt$${salt}$${hash}`;
+};
+
+const verifyPassword = (password, storedHash) => {
+  const parts = (storedHash || "").split("$");
+  if (parts.length !== 3 || parts[0] !== "scrypt") {
+    return false;
+  }
+  const [, salt, expected] = parts;
+  const actual = scryptSync(password, salt, 64).toString("hex");
+  return timingSafeEqual(Buffer.from(actual, "hex"), Buffer.from(expected, "hex"));
+};
 
 export async function POST(request) {
   try {
@@ -25,7 +41,7 @@ export async function POST(request) {
     }
 
     if (admin.password_hash === "$placeholder_change_on_setup$") {
-      const hashedPassword = await argon2.hash(password);
+      const hashedPassword = hashPassword(password);
       const { error: updateError } = await supabase
         .from("admin_users")
         .update({
@@ -46,7 +62,7 @@ export async function POST(request) {
       });
     }
 
-    const validPassword = await argon2.verify(admin.password_hash, password);
+    const validPassword = verifyPassword(password, admin.password_hash);
     if (!validPassword) {
       return Response.json({ error: "Invalid credentials" }, { status: 401 });
     }
