@@ -11,10 +11,7 @@ import {
 
 import { useButton } from '@react-aria/button';
 import {
-  type CSSProperties,
   Component,
-  type FC,
-  type ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -33,7 +30,6 @@ import { serializeError } from 'serialize-error';
 import { Toaster, toast } from 'sonner';
 import { useDevServerHeartbeat } from '../__create/useDevServerHeartbeat';
 import '../__create/design-mode';
-import type { Route } from './+types/root';
 
 export const links = () => [];
 
@@ -43,7 +39,7 @@ if (globalThis.window && globalThis.window !== undefined) {
 
 const LoadFontsSSR = import.meta.env.SSR ? LoadFonts : null;
 if (import.meta.hot) {
-  import.meta.hot.on('update-font-links', (urls: string[]) => {
+  import.meta.hot.on('update-font-links', (urls) => {
     // remove old font links
     for (const link of document.querySelectorAll('link[data-auto-font]')) {
       link.remove();
@@ -60,7 +56,7 @@ if (import.meta.hot) {
   });
 }
 
-function InternalErrorBoundary({ error: errorArg }: Route.ErrorBoundaryProps) {
+function InternalErrorBoundary({ error: errorArg }) {
   const routeError = useRouteError();
   const asyncError = useAsyncError();
   const error = errorArg ?? asyncError ?? routeError;
@@ -71,7 +67,7 @@ function InternalErrorBoundary({ error: errorArg }: Route.ErrorBoundaryProps) {
   const copyButtonPaddingClass = shouldScale ? 'px-[10px] py-[5px]' : 'px-[6px] py-[3px]';
   const postCountRef = useRef(0);
   const lastPostTimeRef = useRef(0);
-  const lastErrorKeyRef = useRef<string | null>(null);
+  const lastErrorKeyRef = useRef(null);
   const MAX_ERROR_POSTS_PER_ERROR = 5;
   const THROTTLE_MS = 1000;
 
@@ -160,7 +156,7 @@ function InternalErrorBoundary({ error: errorArg }: Route.ErrorBoundaryProps) {
         );
       }, [error, shouldScale]),
     },
-    useRef<HTMLButtonElement>(null)
+    useRef(null)
   );
 
   function isInIframe() {
@@ -186,7 +182,7 @@ function InternalErrorBoundary({ error: errorArg }: Route.ErrorBoundaryProps) {
                 ? ({
                     transform: `scale(${scaleFactor})`,
                     transformOrigin: 'bottom center',
-                  } as CSSProperties)
+                  })
                 : undefined
             }
           >
@@ -221,20 +217,14 @@ function InternalErrorBoundary({ error: errorArg }: Route.ErrorBoundaryProps) {
   );
 }
 
-type ErrorBoundaryProps = {
-  children: React.ReactNode;
-};
+class ErrorBoundaryWrapper extends Component {
+  state = { hasError: false, error: null };
 
-type ErrorBoundaryState = { hasError: boolean; error: unknown | null };
-
-class ErrorBoundaryWrapper extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+  static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: unknown, info: unknown) {
+  componentDidCatch(error, info) {
     console.error(error, info);
   }
 
@@ -246,15 +236,11 @@ class ErrorBoundaryWrapper extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 }
 
-function LoaderWrapper({ loader }: { loader: () => React.ReactNode }) {
+function LoaderWrapper({ loader }) {
   return <>{loader()}</>;
 }
 
-type ClientOnlyProps = {
-  loader: () => React.ReactNode;
-};
-
-export const ClientOnly: React.FC<ClientOnlyProps> = ({ loader }) => {
+export const ClientOnly = ({ loader }) => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -281,7 +267,7 @@ export const ClientOnly: React.FC<ClientOnlyProps> = ({ loader }) => {
  *
  * Works only in dev; in prod it always returns `true`.
  */
-export function useHmrConnection(): boolean {
+export function useHmrConnection() {
   const [connected, setConnected] = useState(() => !!import.meta.hot);
 
   useEffect(() => {
@@ -319,7 +305,7 @@ const useHandshakeParent = () => {
       healthy: isHmrConnected,
       supportsErrorDetected: true,
     };
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = (event) => {
       if (event.data.type === 'sandbox:web:healthcheck') {
         window.parent.postMessage(healthyResponse, '*');
       }
@@ -360,7 +346,7 @@ const waitForScreenshotReady = async () => {
 
 export const useHandleScreenshotRequest = () => {
   useEffect(() => {
-    const handleMessage = async (event: MessageEvent) => {
+    const handleMessage = async (event) => {
       if (event.data.type === 'sandbox:web:screenshot:request') {
         try {
           await waitForScreenshotReady();
@@ -402,7 +388,7 @@ export const useHandleScreenshotRequest = () => {
     };
   }, []);
 };
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({ children }) {
   useHandshakeParent();
   useHandleScreenshotRequest();
   useDevServerHeartbeat();
@@ -411,7 +397,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const pathname = location?.pathname;
   const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = (event) => {
       if (event.data.type === 'sandbox:navigation') {
         navigate(event.data.pathname);
       }
