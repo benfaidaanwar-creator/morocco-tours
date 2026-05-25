@@ -1,19 +1,13 @@
 import {
   createElement,
-  type ElementType,
   forwardRef,
-  type Ref,
   useEffect,
-  type ReactNode,
-  type SyntheticEvent,
-  useCallback,
   useRef,
-  type RefObject,
 } from 'react';
 
 const JSX_RENDER_ID_ATTRIBUTE_NAME = 'data-render-id';
 /** Builds an SVG grid that stretches to the given pixel box */
-export function buildGridPlaceholder(w: number, h: number): string {
+export function buildGridPlaceholder(w, h) {
   const size = Math.max(w, h);
   const svg = `
     <svg width="${size}" height="${size}" viewBox="0 0 895 895" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -40,41 +34,25 @@ export function buildGridPlaceholder(w: number, h: number): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-type PropsOf<As extends ElementType> = Omit<React.ComponentPropsWithRef<As>, 'as' | 'ref'>;
-
-interface ExtraProps {
-  renderId?: string;
-}
-
-type PolymorphicProps<As extends ElementType> = PropsOf<As> &
-  ExtraProps & {
-    as: As;
-    children?: ReactNode;
-  };
-
 /**
  * Returns a fallback ref if no ref or a callback ref is passed.
  * Otherwise, it returns the original ref.
  */
-function useOptionalRef<T>(ref?: Ref<T> | null): RefObject<T> {
-  const fallbackRef = useRef<T>(null);
+function useOptionalRef(ref) {
+  const fallbackRef = useRef(null);
   if (ref && 'instance' in ref) return fallbackRef;
-  return (ref as RefObject<T> | null) ?? fallbackRef;
+  return ref ?? fallbackRef;
 }
 
 const CreatePolymorphicComponent = forwardRef(
-  // @ts-expect-error -- generic forwardRef signature doesn't propagate the As type param
-  function CreatePolymorphicComponentRender<As extends ElementType = 'div'>(
-    { as, children, renderId, onError, ...rest }: PolymorphicProps<As>,
-    forwardedRef?: Ref<Element>
-  ) {
+  function CreatePolymorphicComponentRender({ as = 'div', children, renderId, onError, ...rest }, forwardedRef) {
     // Augment <img> with fail-safe logic
     const props =
       as === 'img'
         ? {
             ...rest,
             // keep the original type of onError for <img>
-            onError: (e: SyntheticEvent<HTMLImageElement, Event>) => {
+            onError: (e) => {
               if (typeof onError === 'function') onError(e);
               const img = e.currentTarget;
               const { width, height } = img.getBoundingClientRect();
@@ -89,7 +67,7 @@ const CreatePolymorphicComponent = forwardRef(
 
     // If a grid placeholder is active, regenerate it on resize
     useEffect(() => {
-      const el = ref && 'current' in (ref as any) ? (ref as any).current : null;
+      const el = ref && 'current' in ref ? ref.current : null;
       if (!el) return;
       if (as !== 'img') {
         const placeholder = () => {

@@ -2,25 +2,15 @@ import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-	type RouteConfigEntry,
 	index,
 	route,
 } from '@react-router/dev/routes';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-type Tree = {
-	path: string;
-	children: Tree[];
-	hasPage: boolean;
-	isParam: boolean;
-	paramName: string;
-	isCatchAll: boolean;
-};
-
-function buildRouteTree(dir: string, basePath = ''): Tree {
+function buildRouteTree(dir, basePath = '') {
 	const files = readdirSync(dir);
-	const node: Tree = {
+	const node = {
 		path: basePath,
 		children: [],
 		hasPage: false,
@@ -60,8 +50,8 @@ function buildRouteTree(dir: string, basePath = ''): Tree {
 	return node;
 }
 
-function generateRoutes(node: Tree): RouteConfigEntry[] {
-	const routes: RouteConfigEntry[] = [];
+function generateRoutes(node) {
+	const routes = [];
 
 	if (node.hasPage) {
 		const componentPath =

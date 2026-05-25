@@ -29,7 +29,6 @@ import { useNavigate } from 'react-router';
 import { serializeError } from 'serialize-error';
 import { Toaster, toast } from 'sonner';
 import { useDevServerHeartbeat } from '../__create/useDevServerHeartbeat';
-import '../__create/design-mode';
 
 export const links = () => [];
 

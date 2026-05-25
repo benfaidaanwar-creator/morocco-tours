@@ -1,7 +1,7 @@
 const originalFetch = fetch;
 const isBackend = () => typeof window === 'undefined';
 
-const safeStringify = (value: unknown) =>
+const safeStringify = (value) =>
   JSON.stringify(value, (_k, v) => {
     if (v instanceof Date) return { __t: 'Date', v: v.toISOString() };
     if (v instanceof Error)
@@ -9,7 +9,7 @@ const safeStringify = (value: unknown) =>
     return v;
   });
 
-const postToParent = (level: string, text: string, extra: unknown) => {
+const postToParent = (level, text, extra) => {
   try {
     if (isBackend() || !window.parent || window.parent === window) {
       ('level' in console ? console[level] : console.log)(text, extra);
@@ -30,18 +30,18 @@ const postToParent = (level: string, text: string, extra: unknown) => {
   }
 };
 
-const getUrlFromArgs = (...args: Parameters<typeof originalFetch>): string => {
+const getUrlFromArgs = (...args) => {
   const [input] = args;
   if (typeof input === 'string') return input;
   if (input instanceof Request) return input.url;
   return `${input.protocol}//${input.host}${input.pathname}`;
 };
 
-const isFirstPartyURL = (url: string) => {
+const isFirstPartyURL = (url) => {
   return url.startsWith('/integrations') || url.startsWith('/_create');
 };
 
-const isSecondPartyUrl = (url: string) => {
+const isSecondPartyUrl = (url) => {
   return (
     (process.env.NEXT_PUBLIC_CREATE_API_BASE_URL &&
       url.startsWith(process.env.NEXT_PUBLIC_CREATE_API_BASE_URL)) ||
@@ -54,10 +54,7 @@ const isSecondPartyUrl = (url: string) => {
   );
 };
 
-export const fetchWithHeaders = async (
-  input: RequestInfo | URL,
-  init?: RequestInit
-): Promise<Response> => {
+export const fetchWithHeaders = async (input, init) => {
   const url = getUrlFromArgs(input, init);
 
   const additionalHeaders = {
@@ -72,7 +69,7 @@ export const fetchWithHeaders = async (
   }
 
   // Normalize Request into init
-  let finalInit: RequestInit;
+  let finalInit;
   if (input instanceof Request) {
     const hasBody = !!input.body;
     finalInit = {
