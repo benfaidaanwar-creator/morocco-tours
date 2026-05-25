@@ -7,8 +7,8 @@ const source = resolve(root, "apps/web/.vercel/output");
 const destination = resolve(root, ".vercel/output");
 
 if (!existsSync(source)) {
-  console.warn("No apps/web/.vercel/output directory was produced by the web build.");
-  process.exit(0);
+  console.error("No apps/web/.vercel/output directory was produced by the web build.");
+  process.exit(1);
 }
 
 rmSync(resolve(root, ".vercel"), { recursive: true, force: true });
