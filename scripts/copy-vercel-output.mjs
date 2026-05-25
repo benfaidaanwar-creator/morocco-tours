@@ -3,17 +3,26 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const source = resolve(root, "apps/web/.vercel");
-const buildResult = resolve(source, "react-router-build-result.json");
-const destination = resolve(root, ".vercel");
+const webVercelDir = resolve(root, "apps/web/.vercel");
+const webBuildDir = resolve(root, "apps/web/build");
+const buildResult = resolve(webVercelDir, "react-router-build-result.json");
+const rootVercelDir = resolve(root, ".vercel");
+const rootBuildDir = resolve(root, "build");
 
 if (!existsSync(buildResult)) {
   console.error("No apps/web/.vercel/react-router-build-result.json file was produced by the web build.");
   process.exit(1);
 }
 
-rmSync(resolve(root, ".vercel"), { recursive: true, force: true });
-mkdirSync(dirname(destination), { recursive: true });
-cpSync(source, destination, { recursive: true });
+if (!existsSync(webBuildDir)) {
+  console.error("No apps/web/build directory was produced by the web build.");
+  process.exit(1);
+}
 
-console.log("Copied apps/web/.vercel React Router metadata to .vercel for Vercel.");
+rmSync(rootVercelDir, { recursive: true, force: true });
+rmSync(rootBuildDir, { recursive: true, force: true });
+mkdirSync(dirname(rootVercelDir), { recursive: true });
+cpSync(webVercelDir, rootVercelDir, { recursive: true });
+cpSync(webBuildDir, rootBuildDir, { recursive: true });
+
+console.log("Copied apps/web React Router build artifacts to the repository root for Vercel.");
