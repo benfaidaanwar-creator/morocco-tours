@@ -6,7 +6,7 @@
   },
   "scripts": {
     "prebuild": "npm --prefix apps/web install --legacy-peer-deps",
-    "build": "npm --prefix apps/web run build",
+    "build": "npm --prefix apps/web run build && node scripts/copy-vercel-output.mjs",
     "dev:web": "npm --prefix apps/web run dev"
   }
 }
